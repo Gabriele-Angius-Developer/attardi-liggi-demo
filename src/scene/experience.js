@@ -141,6 +141,22 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   const last = new WeakMap();
   const setO = (el, v) => { if (!el) return; const p = last.get(el); if (p === undefined || Math.abs(p - v) > .004) { last.set(el, v); el.style.opacity = v.toFixed(3); } };
   const setT = (el, v) => { if (el && el.textContent !== v) el.textContent = v; };
+  // List stepper: the shown index walks one item at a time towards the index computed from P, and every item
+  // stays lit >= DWELL ms before the next one. An item already shown that long changes at once, so a normal
+  // 1-step change is immediate; a fast scroll (whose damped target moves one item per frame) is spaced out.
+  // It jumps straight to the target while its section is not visible, with reduced motion, and on the first frame.
+  // Plain numbers and timestamps only: nothing is allocated per frame.
+  const DWELL = 180;
+  const mkStep = () => ({ shown: -1, target: -1, t: 0 });
+  const stMat = mkStep(), stW = mkStep(), stImp = mkStep(), stB = mkStep(), stT = mkStep();
+  function stepTo(s, target, now, live) {
+    s.target = target;
+    if (reduced || !live || s.shown < 0) { if (s.shown !== target) { s.shown = target; s.t = now; } return target; }
+    if (s.shown !== target && now - s.t >= DWELL) { s.shown += target > s.shown ? 1 : -1; s.t = now; }
+    return s.shown;
+  }
+  // Same window as the data-fade opacity of section i (visible between i - .3 and i + .86).
+  const secLive = (i, P) => P > i - .3 && P < i + .86;
   let tops = [], hts = [];
   const measure = () => { tops = secs.map(s => s.getBoundingClientRect().top + scrollY); hts = secs.map(s => s.offsetHeight); };
   measure();
@@ -306,21 +322,27 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     placeLbl(lbl.t0, wpos(bar, LB.t0), to, true);
     placeLbl(lbl.t1, wpos(toronto, LB.t1), to);
     placeLbl(lbl.c0, wpos(crownG, LB.c0).addScaledVector(camRight, .15), win(P, 4.4, 4.44, 4.56, 4.6));
+    // Scroll-highlighted lists go through a stepper, so a fast scroll never skips an item.
     if (P > 2.8 && P < 4.9) {
-      for (const el of mkEls) setO(el, el.dataset.mk === shownK ? 1 : .18);
-      setT(matLabel, `3D · CORONA — ${MAT_LABEL[shownK]}`);
-      setT(clipLabel, fromK ? `CLIPPING PLANE ${S.ax.toUpperCase()} = ${Math.round(f * 100)}%` : `STATO · ${MAT_LABEL[shownK]}`);
-      const w = clamp(Math.floor((P - 4) / .1), 0, 5);
-      wsteps.forEach((el, k) => setO(el, k === w ? 1 : 0));
-      wbars.forEach((el, k) => { setO(el, k === w ? 1 : k < w ? .6 : .3); const bc = k === w ? '#3D63FF' : 'rgba(236,230,220,.5)'; if (el.style.borderTopColor !== bc) el.style.borderTopColor = bc; });
+      const mi = stepTo(stMat, fromK && f < .5 ? ci - 1 : ci, now, secLive(3, P)), mk = STAGES[mi].k, catching = mi !== stMat.target;
+      for (const el of mkEls) setO(el, el.dataset.mk === mk ? 1 : .18);
+      setT(matLabel, `3D · CORONA — ${MAT_LABEL[mk]}`);
+      setT(clipLabel, fromK && !catching ? `CLIPPING PLANE ${S.ax.toUpperCase()} = ${Math.round(f * 100)}%` : `STATO · ${MAT_LABEL[mk]}`);
+      const w = stepTo(stW, clamp(Math.floor((P - 4) / .1), 0, 5), now, secLive(4, P));
+      for (let k = 0; k < wsteps.length; k++) setO(wsteps[k], k === w ? 1 : 0);
+      for (let k = 0; k < wbars.length; k++) { const el = wbars[k]; setO(el, k === w ? 1 : k < w ? .6 : .3); const bc = k === w ? '#3D63FF' : 'rgba(236,230,220,.5)'; if (el.style.borderTopColor !== bc) el.style.borderTopColor = bc; }
     }
     if (P > 1.5 && P < 3.2) {
-      impItems.forEach((el, k) => setO(el, P >= 2 + .055 * k ? 1 : .14));
+      // cumulative: item k is lit once P >= 2 + .055k → step over the number of lit items
+      const lit = stepTo(stImp, P < 2 ? 0 : Math.min(impItems.length, Math.floor((P - 2) / .055) + 1), now, secLive(2, P));
+      for (let k = 0; k < impItems.length; k++) setO(impItems[k], k < lit ? 1 : .14);
       setT(explodeLabel, `ESPLOSO · ${Math.round(e * 100)}%`); if (explodeBar) explodeBar.style.height = (e * 100).toFixed(1) + '%';
     }
     if (P > 5.5 && P < 7.9) {
-      const b = P < 6.25 ? 0 : P < 6.4 ? 1 : P < 6.5 ? 2 : P < 6.6 ? 3 : 4; bitems.forEach((el, k) => setO(el, k === b ? 1 : .3));
-      const t = clamp(Math.floor((P - 7) / .1), 0, 5); titems.forEach((el, k) => setO(el, k === t ? 1 : .3));
+      const b = stepTo(stB, P < 6.25 ? 0 : P < 6.4 ? 1 : P < 6.5 ? 2 : P < 6.6 ? 3 : 4, now, secLive(6, P));
+      for (let k = 0; k < bitems.length; k++) setO(bitems[k], k === b ? 1 : .3);
+      const t = stepTo(stT, clamp(Math.floor((P - 7) / .1), 0, 5), now, secLive(7, P));
+      for (let k = 0; k < titems.length; k++) setO(titems[k], k === t ? 1 : .3);
     }
     const hv = win(P, 7.95, 8.05, 8.55, 8.68);
     hots.forEach((el, k) => {
