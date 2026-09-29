@@ -9,6 +9,8 @@
   .foot { gap: 12px; }
   .foot-right { flex: 0 1 auto; min-width: 0; }
   .foot-track { flex-shrink: 1; min-width: 24px; }
+  /* Bottom-right corner mark sits on top of "SCORRI" at every phone width (footer gutter 20-30px vs mark at 24px) */
+  .corner-br { display: none; }
 }
 
 /* Desktop contacts on short viewports: the closing arch scales with height, the text block does not.
