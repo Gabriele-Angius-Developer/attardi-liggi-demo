@@ -17,17 +17,22 @@ const lblBox = (id, inner) => `<div data-lbl="${id}" style="position:fixed;left:
 const sticky = (pad, extra) => `position:sticky;top:0;height:${VH(100)};box-sizing:border-box;padding:${pad} ${PADX} 80px;${extra};pointer-events:none;overflow:hidden`;
 
 /* ---------- dynamic fragments ---------- */
+// Competences 6.1–6.6: every version is rendered once; src/ui/comp.js only toggles styles/attributes,
+// so nothing is re-rendered while scrolling. Mobile openings stay in the DOM, collapsed with an animated
+// grid row (0fr ↔ 1fr), so the list never jumps.
 export function compList(s) {
-  return COMPS.map(([t], i) => {
+  return COMPS.map(([t, items], i) => {
     const on = i === s.comp;
-    const open = s.mobile && on ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;padding:10px 0 12px 60px">${COMPS[i][1].map(x => `<div style="font:400 13px/1.35 'Geist';color:#B9B3A9">${esc(x)}</div>`).join('')}</div>` : '';
-    return `<button type="button" class="u-btn" data-comp="${i}" aria-pressed="${on}" style="cursor:pointer;width:100%;display:flex;align-items:baseline;gap:24px;padding:min(13px,${VH(1.3)}) 0;border-bottom:1px solid rgba(236,230,220,.1)"><span style="font:400 11px 'Geist Mono';color:${on ? B : '#5A5650'};width:36px">6.${i + 1}</span><span class="comp-name" style="font:500 clamp(20px,min(${VW(2.6)},${VH(4.3)}),38px)/1 'Geist';letter-spacing:-.04em;color:${on ? W : '#3a3833'};transition:color .3s;white-space:nowrap">${esc(t.toUpperCase())}</span></button>${open}`;
+    const open = s.mobile ? `<div data-compopen="${i}" aria-hidden="${!on}" style="display:grid;grid-template-rows:${on ? '1fr' : '0fr'};opacity:${on ? 1 : 0};transition:grid-template-rows .4s ease,opacity .4s ease"><div style="overflow:hidden;min-height:0"><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;padding:10px 0 12px 60px">${items.map(x => `<div style="font:400 13px/1.35 'Geist';color:#B9B3A9">${esc(x)}</div>`).join('')}</div></div></div>` : '';
+    return `<button type="button" class="u-btn" data-comp="${i}" aria-pressed="${on}"${on ? ' aria-current="true"' : ''} style="cursor:pointer;width:100%;display:flex;align-items:baseline;gap:24px;padding:min(13px,${VH(1.3)}) 0;border-bottom:1px solid rgba(236,230,220,.1)"><span data-compnum style="font:400 11px 'Geist Mono';color:${on ? B : '#5A5650'};width:36px;transition:color .3s">6.${i + 1}</span><span class="comp-name" style="font:500 clamp(20px,min(${VW(2.6)},${VH(4.3)}),38px)/1 'Geist';letter-spacing:-.04em;color:${on ? W : '#3a3833'};transition:color .3s;white-space:nowrap">${esc(t.toUpperCase())}</span></button>${open}`;
   }).join('');
 }
 export function compDetail(s) {
   if (s.mobile) return '';
-  const [t, items] = COMPS[s.comp];
-  return `<div style="display:flex;flex-direction:column;gap:14px;max-width:440px"><div style="padding-bottom:10px;border-bottom:1px solid rgba(61,99,255,.5);font:500 11px 'Geist Mono';letter-spacing:.12em;color:#3D63FF">6.${s.comp + 1} — ${esc(t.toUpperCase())}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px">${items.map(x => `<div style="font:400 15px/1.4 'Geist';color:#B9B3A9">${esc(x)}</div>`).join('')}</div></div>`;
+  return `<div style="display:grid">${COMPS.map(([t, items], i) => {
+    const on = i === s.comp;
+    return `<div data-compdetail="${i}" aria-hidden="${!on}" style="grid-area:1/1;align-self:end;display:flex;flex-direction:column;gap:14px;max-width:440px;opacity:${on ? 1 : 0};pointer-events:${on ? 'auto' : 'none'};transition:opacity .4s ease"><div style="padding-bottom:10px;border-bottom:1px solid rgba(61,99,255,.5);font:500 11px 'Geist Mono';letter-spacing:.12em;color:#3D63FF">6.${i + 1} — ${esc(t.toUpperCase())}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px">${items.map(x => `<div style="font:400 15px/1.4 'Geist';color:#B9B3A9">${esc(x)}</div>`).join('')}</div></div>`;
+  }).join('')}</div>`;
 }
 export function hotInner(s, i) {
   const on = i === s.node, ring = s.mobile ? 92 : 170, fs = s.mobile ? 10 : 12;

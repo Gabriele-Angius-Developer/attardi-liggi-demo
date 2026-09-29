@@ -1,4 +1,5 @@
-import { compList, compDetail, hotInner, nodePanel, reqChips } from './template.js';
+import { hotInner, nodePanel, reqChips } from './template.js';
+import { applyComp } from './comp.js';
 
 // Event delegation for the few interactive parts. Only small inner fragments are re-rendered,
 // so the elements the 3D scene holds references to (data-hot, data-fade…) stay in place.
@@ -6,10 +7,11 @@ export function bindInteractions({ app, state, getExperience }) {
   const onClick = e => {
     const comp = e.target.closest('[data-comp]');
     if (comp) {
-      state.comp = +comp.dataset.comp;
-      app.querySelector('#comp-list').innerHTML = compList(state);
-      app.querySelector('#comp-detail').innerHTML = compDetail(state);
-      app.querySelector(`[data-comp="${state.comp}"]`)?.focus({ preventScroll: true });
+      // With the scroll sequence running, a click scrolls to that item so scroll and state never disagree.
+      // Reduced motion (or no 3D scene): the click selects the item directly, as before.
+      const k = +comp.dataset.comp, exp = getExperience();
+      if (exp && !exp.reduced) exp.scrollToComp(k);
+      else { state.comp = k; applyComp(app, k); }
       return;
     }
     const node = e.target.closest('[data-node]');

@@ -16,7 +16,7 @@ gsap.registerPlugin(ScrollTrigger);
 // Mobile toolbar show/hide must not trigger a full refresh (it also interrupts momentum scrolling on iOS).
 ScrollTrigger.config({ ignoreMobileResize: true });
 
-export function createExperience({ host, root, reduced = false, active = 1, viewport, sectionVH, debug = false }) {
+export function createExperience({ host, root, reduced = false, active = 1, viewport, sectionVH, onComp, debug = false }) {
   const VP = viewport || (() => [innerWidth, innerHeight]);
   let [W, H] = VP(), mobile = W < 760;
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -148,7 +148,10 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   // Plain numbers and timestamps only: nothing is allocated per frame.
   const DWELL = 180;
   const mkStep = () => ({ shown: -1, target: -1, t: 0 });
-  const stMat = mkStep(), stW = mkStep(), stImp = mkStep(), stB = mkStep(), stT = mkStep();
+  const stMat = mkStep(), stW = mkStep(), stImp = mkStep(), stB = mkStep(), stT = mkStep(), stC = mkStep();
+  // Scene 06 competences: the hold P 5.02–5.58 is split into 6 equal parts, one item each (6.1 → 6.6).
+  const COMP_A = 5.02, COMP_STEP = (5.58 - COMP_A) / 6;
+  let compShown = -1;
   function stepTo(s, target, now, live) {
     s.target = target;
     if (reduced || !live || s.shown < 0) { if (s.shown !== target) { s.shown = target; s.t = now; } return target; }
@@ -344,6 +347,11 @@ export function createExperience({ host, root, reduced = false, active = 1, view
       const t = stepTo(stT, clamp(Math.floor((P - 7) / .1), 0, 5), now, secLive(7, P));
       for (let k = 0; k < titems.length; k++) setO(titems[k], k === t ? 1 : .3);
     }
+    // Reduced motion: no automatic sequence, the items stay click-driven (starting from 6.1).
+    if (onComp && !reduced) {
+      const c = stepTo(stC, clamp(Math.floor((P - COMP_A) / COMP_STEP), 0, 5), now, secLive(5, P));
+      if (c !== compShown) { compShown = c; onComp(c); }
+    }
     const hv = win(P, 7.95, 8.05, 8.55, 8.68);
     hots.forEach((el, k) => {
       setO(el, hv); const pe = hv > .5 ? 'auto' : 'none'; if (el.style.pointerEvents !== pe) { el.style.pointerEvents = pe; el.tabIndex = hv > .5 ? 0 : -1; }
@@ -354,7 +362,14 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   raf = requestAnimationFrame(frame);
 
   return {
+    reduced,
     setActive(k) { active = k; },
+    // Smooth-scroll to the middle of competence k's slot in the scene-06 hold (inverse of mapScroll for section 5).
+    scrollToComp(k) {
+      measure();
+      const vh = (sectionVH && sectionVH()) || H, Pk = COMP_A + (k + .5) * COMP_STEP;
+      scrollTo({ top: Math.round(tops[5] + (Pk - 5) / .6 * Math.max(1, hts[5] - vh)), behavior: 'smooth' });
+    },
     progress: () => proxy.p,
     destroy() {
       cancelAnimationFrame(raf); clearTimeout(redTimer); clearTimeout(loaderTimer);

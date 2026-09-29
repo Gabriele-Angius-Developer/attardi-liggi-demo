@@ -1,6 +1,7 @@
 import { createExperience } from './scene/experience.js';
 import { renderApp } from './ui/template.js';
 import { bindInteractions } from './ui/interactions.js';
+import { applyComp } from './ui/comp.js';
 
 const BREAKPOINT = 760;
 const params = new URLSearchParams(location.search);
@@ -41,6 +42,8 @@ const sectionVH = () => vpH;
 
 const state = { comp: 0, node: 1, req: 0, mobile: isMobile() };
 let exp = null, token = 0;
+// Scene 06: the scroll stepper drives the active competence (see experience.js)
+const onComp = k => { state.comp = k; applyComp(app, k); };
 
 function fallbackStatic() {
   const l = app.querySelector('[data-loader]'); if (l) l.style.display = 'none';
@@ -53,7 +56,7 @@ function boot() {
   content.innerHTML = renderApp(state);
   setViewportVars();
   try {
-    exp = createExperience({ host: stage, root: app, reduced: isReduced(), active: state.node, viewport, sectionVH, debug: DEBUG });
+    exp = createExperience({ host: stage, root: app, reduced: isReduced(), active: state.node, viewport, sectionVH, onComp, debug: DEBUG });
     if (my !== token) { exp.destroy(); exp = null; }
   } catch (err) {
     console.error('3D scene failed to start', err);
