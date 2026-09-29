@@ -13,8 +13,10 @@ import {
 } from './choreography.js';
 
 gsap.registerPlugin(ScrollTrigger);
+// Mobile toolbar show/hide must not trigger a full refresh (it also interrupts momentum scrolling on iOS).
+ScrollTrigger.config({ ignoreMobileResize: true });
 
-export function createExperience({ host, root, reduced = false, active = 1, viewport, debug = false }) {
+export function createExperience({ host, root, reduced = false, active = 1, viewport, sectionVH, debug = false }) {
   const VP = viewport || (() => [innerWidth, innerHeight]);
   let [W, H] = VP(), mobile = W < 760;
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -143,7 +145,8 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   const measure = () => { tops = secs.map(s => s.getBoundingClientRect().top + scrollY); hts = secs.map(s => s.offsetHeight); };
   measure();
   function mapScroll(y) {
-    const vh = H, n = secs.length;
+    // Sticky frames are 100 --vh tall (not the live innerHeight, which moves with the mobile toolbar)
+    const vh = (sectionVH && sectionVH()) || H, n = secs.length;
     for (let i = 0; i < n - 1; i++) {
       const t = tops[i], h = hts[i];
       if (y < t + h - vh) return i + .6 * clamp((y - t) / Math.max(1, h - vh));
@@ -156,13 +159,16 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   const proxy = { p: mapScroll(scrollY) }; let target = proxy.p;
   const retarget = () => { target = mapScroll(scrollY); if (!reduced) gsap.to(proxy, { p: target, duration: 1, ease: 'power2.out', overwrite: true }); };
   // ScrollTrigger.refresh() (every resize) briefly scrolls to 0 to measure: ignore those updates and re-sync once it is done.
-  const st = ScrollTrigger.create({ start: 0, end: 'max', onUpdate: () => { if (!ScrollTrigger.isRefreshing) retarget(); } });
+  // Progress is driven by the native scroll event, not ScrollTrigger.onUpdate: on touch devices ScrollTrigger ignores
+  // toolbar resizes, so its cached end ('max') could stay shorter than the real page and onUpdate stopped firing
+  // before the last scenes (iOS: stuck around scene 09/10). The trigger is kept only for refresh handling.
+  const st = ScrollTrigger.create({ start: 0, end: 'max' });
   const onRefresh = () => { measure(); retarget(); if (reduced) proxy.p = target; };
   ScrollTrigger.addEventListener('refresh', onRefresh);
   // Mobile: the closing arch sits in the contacts' top spacer, but that section is taller than the viewport,
   // so past its top the fixed stage scrolls with the page instead of covering the address and form.
   const follow = () => { const over = mobile ? Math.max(0, Math.round(scrollY - tops[tops.length - 1])) : 0, tf = over ? `translate3d(0,${-over}px,0)` : ''; if (host.style.transform !== tf) host.style.transform = tf; };
-  const onScroll = () => { measure(); target = mapScroll(scrollY); follow(); if (reduced) proxy.p = target; if (nav) { const on = scrollY > 40; nav.style.background = on ? 'rgba(22,22,26,.82)' : 'transparent'; nav.style.borderBottomColor = on ? 'rgba(236,230,220,.08)' : 'transparent'; nav.style.backdropFilter = on ? 'blur(12px)' : 'none'; } };
+  const onScroll = () => { measure(); if (!ScrollTrigger.isRefreshing) retarget(); follow(); if (reduced) proxy.p = target; if (nav) { const on = scrollY > 40; nav.style.background = on ? 'rgba(22,22,26,.82)' : 'transparent'; nav.style.borderBottomColor = on ? 'rgba(236,230,220,.08)' : 'transparent'; nav.style.backdropFilter = on ? 'blur(12px)' : 'none'; } };
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
   let mx = 0, my = 0, tmx = 0, tmy = 0;

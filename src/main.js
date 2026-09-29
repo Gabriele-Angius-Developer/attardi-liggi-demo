@@ -17,12 +17,27 @@ const zoom = () => (DEBUG ? parseFloat(document.documentElement.style.zoom) || 1
 const viewport = () => (DEBUG && window.__alVP) ? window.__alVP : [innerWidth / zoom(), innerHeight / zoom()];
 const isMobile = () => viewport()[0] < BREAKPOINT;
 
-// CSS viewport units used by the layout (stable on mobile browsers with dynamic toolbars)
+// CSS viewport units used by the layout.
+// Touch browsers (iOS Safari) fire resize while the toolbar shows/hides; re-deriving --vh from that height
+// changed every section's height mid-scroll, so the same scrollY mapped back to an earlier scene and the end
+// of the page (scene 11) kept slipping away. On touch devices --vh only follows width/orientation changes and
+// uses the largest height seen at that width (= 100lvh, toolbar hidden). Desktop keeps tracking real resizes.
+const coarse = matchMedia('(pointer: coarse)');
+const lvhProbe = document.createElement('div');
+lvhProbe.setAttribute('aria-hidden', 'true');
+lvhProbe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:100vh;height:100lvh;visibility:hidden;pointer-events:none';
+document.body.appendChild(lvhProbe);
+let vpW = -1, vpH = 0;
 function setViewportVars() {
   const [w, h] = (DEBUG && window.__alVP) ? window.__alVP : [document.documentElement.clientWidth / zoom(), innerHeight / zoom()];
-  app.style.setProperty('--vh', h / 100 + 'px');
+  const stable = coarse.matches && !(DEBUG && window.__alVP);
+  if (!stable || w !== vpW) { vpW = w; vpH = 0; }
+  vpH = stable ? Math.max(vpH, h, lvhProbe.offsetHeight / zoom()) : h;
+  app.style.setProperty('--vh', vpH / 100 + 'px');
   app.style.setProperty('--vw', w / 100 + 'px');
 }
+// Height of one 100 --vh unit in px: the sticky frames' height, used by the scene to map scroll → progress.
+const sectionVH = () => vpH;
 
 const state = { comp: 0, node: 1, req: 0, mobile: isMobile() };
 let exp = null, token = 0;
@@ -38,7 +53,7 @@ function boot() {
   content.innerHTML = renderApp(state);
   setViewportVars();
   try {
-    exp = createExperience({ host: stage, root: app, reduced: isReduced(), active: state.node, viewport, debug: DEBUG });
+    exp = createExperience({ host: stage, root: app, reduced: isReduced(), active: state.node, viewport, sectionVH, debug: DEBUG });
     if (my !== token) { exp.destroy(); exp = null; }
   } catch (err) {
     console.error('3D scene failed to start', err);
