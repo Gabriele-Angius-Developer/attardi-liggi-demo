@@ -165,22 +165,22 @@ ${FIELDS.map(([l, p, type], i) => `<label style="display:flex;align-items:baseli
 </form>`;
 
   const cLbl = t => `<span style="font:400 10px/1.6 'Geist Mono';letter-spacing:.12em;color:#8E887F">${t}</span>`;
-  const cell = (l, v) => `<div style="display:flex;flex-direction:column;gap:3px;padding:10px 0;border-top:1px solid rgba(236,230,220,.14)">${cLbl(l)}${v}</div>`;
+  const cell = (l, v) => `<div class="c-cell" style="display:flex;flex-direction:column;gap:3px;padding:10px 0;border-top:1px solid rgba(236,230,220,.14)">${cLbl(l)}${v}</div>`;
   const flag = t => `<span style="font:400 11px/1.5 'Geist Mono';letter-spacing:.06em;color:#3D63FF">${t}</span>`;
   const row = (l, v) => `<div style="display:flex;gap:18px;padding:11px 0;border-top:1px solid rgba(236,230,220,.14)"><span style="width:96px;flex:none;font:400 11px/1.9 'Geist Mono';letter-spacing:.1em;color:#8E887F">${l}</span>${v}</div>`;
   const flagM = t => `<span style="font:400 11px/1.9 'Geist Mono';letter-spacing:.06em;color:#3D63FF">${t}</span>`;
   const tel = `<a href="${CONTACT.phoneHref}" style="pointer-events:auto">${CONTACT.phone}</a>`;
   const info = `<div data-fade="10" style="flex:1 1 420px;display:flex;flex-direction:column;justify-content:flex-start;opacity:0">${M ? `<div style="height:${VH(30)}"></div>` : ''}
 <p style="margin:0 0 0 -3px;font:500 clamp(40px,min(${VW(6.1)},${VH(9.8)}),88px)/1 'Geist';letter-spacing:-.045em;white-space:nowrap">ATTARDI &amp; LIGGI</p>
-${D ? `<div aria-hidden="true" style="margin-top:14px;max-width:600px;${RULER}"></div>
-<address style="font-style:normal;margin-top:18px;max-width:600px;display:grid;grid-template-columns:1fr 1fr;column-gap:24px;font:400 14px/1.4 'Geist';color:#ECE6DC">${cell('INDIRIZZO', `<span>${CONTACT.street} · ${CONTACT.city}</span>`)}${cell('TELEFONO', tel)}${cell('EMAIL', flag(CONTACT.email))}${cell('ORARI', flag(CONTACT.hours))}</address><div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(236,230,220,.14);max-width:600px;font:400 10px/1.6 'Geist Mono';letter-spacing:.1em;color:#5A5650">${CONTACT.legal} · CAGLIARI, SARDEGNA</div>`
+${D ? `<div class="c-ruler" aria-hidden="true" style="margin-top:14px;max-width:600px;${RULER}"></div>
+<address class="c-addr" style="font-style:normal;margin-top:18px;max-width:600px;display:grid;grid-template-columns:1fr 1fr;column-gap:24px;font:400 14px/1.4 'Geist';color:#ECE6DC">${cell('INDIRIZZO', `<span>${CONTACT.street} · ${CONTACT.city}</span>`)}${cell('TELEFONO', tel)}${cell('EMAIL', flag(CONTACT.email))}${cell('ORARI', flag(CONTACT.hours))}</address><div class="c-legal" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(236,230,220,.14);max-width:600px;font:400 10px/1.6 'Geist Mono';letter-spacing:.1em;color:#5A5650">${CONTACT.legal} · CAGLIARI, SARDEGNA</div>`
     : `<div style="margin-top:20px;display:flex;flex-direction:column;gap:4px;font:400 12px/1.7 'Geist Mono';letter-spacing:.1em;color:#B9B3A9"><span>LABORATORIO ODONTOTECNICO</span><span>CAGLIARI · SARDEGNA</span></div>
 <address style="font-style:normal;margin-top:20px;max-width:600px;display:flex;flex-direction:column;border-bottom:1px solid rgba(236,230,220,.14);font:400 15px/1.4 'Geist';color:#ECE6DC">${row('INDIRIZZO', `<span>${CONTACT.street}<br>${CONTACT.city}</span>`)}${row('TELEFONO', tel)}${row('EMAIL', flagM(CONTACT.email))}${row('ORARI', flagM(CONTACT.hours))}</address>
 <div style="margin-top:14px;font:400 10px/1.6 'Geist Mono';letter-spacing:.1em;color:#5A5650">${CONTACT.legal}</div>`}
 </div>`;
 
   const s10 = `<section id="contatti" data-sec="10" aria-label="Contatti" style="min-height:${VH(100)};position:relative">
-<div style="min-height:${VH(100)};box-sizing:border-box;padding:110px ${PADX} 80px;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;gap:40px;align-items:stretch">
+<div class="c-wrap" style="min-height:${VH(100)};box-sizing:border-box;padding:110px ${PADX} 80px;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;gap:40px;align-items:stretch">
 ${form}
 ${info}</div></section>`;
 

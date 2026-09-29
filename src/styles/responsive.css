@@ -11,6 +11,24 @@
   .foot-track { flex-shrink: 1; min-width: 24px; }
 }
 
+/* Desktop contacts on short viewports: the closing arch scales with height, the text block does not.
+   Tighten vertical spacing (section top padding is shared by form + info, so they stay aligned)
+   until the legal line clears the arch. Typography and camera are unchanged. */
+@media (min-width: 760px) and (max-height: 800px) {
+  .c-wrap { padding-top: 90px !important; }
+  .c-ruler { margin-top: 8px !important; }
+  .c-addr { margin-top: 10px !important; }
+  .c-cell { padding: 6px 0 !important; }
+  .c-legal { margin-top: 4px !important; padding-top: 4px !important; }
+}
+@media (min-width: 760px) and (max-height: 700px) {
+  .c-wrap { padding-top: 84px !important; }
+  .c-ruler { margin-top: 4px !important; }
+  .c-addr { margin-top: 6px !important; }
+  .c-cell { padding: 3px 0 !important; }
+  .c-legal { margin-top: 3px !important; padding-top: 3px !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: .01ms !important; }
 }
