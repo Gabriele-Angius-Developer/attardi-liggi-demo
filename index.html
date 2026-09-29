@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attardi &amp; Liggi — Laboratorio Odontotecnico | Demo</title>
+  <meta name="description" content="Demo del sito di Attardi &amp; Liggi, laboratorio odontotecnico a Cagliari.">
+  <meta name="theme-color" content="#0A0A0B">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/styles/global.css">
+  <link rel="stylesheet" href="./src/styles/responsive.css">
+</head>
+<body>
+  <div id="app" style="position:relative;background:#0A0A0B;color:#ECE6DC;font-family:'Geist',system-ui,sans-serif">
+    <div id="stage" aria-hidden="true" style="position:fixed;inset:0;z-index:0;background:#0A0A0B"></div>
+    <div data-loader aria-hidden="true" style="position:fixed;inset:0;z-index:20;background:#0A0A0B;display:flex;align-items:center;justify-content:center;transition:opacity 1.2s ease"><div style="display:flex;flex-direction:column;align-items:center;gap:14px;font:400 11px 'Geist Mono';letter-spacing:.12em;color:#5A5650"><div style="font:500 15px 'Geist';letter-spacing:-.01em;color:#ECE6DC">ATTARDI &amp; LIGGI</div><div style="width:120px;height:1px;background:rgba(236,230,220,.12)"><div style="width:40%;height:1px;background:#3D63FF"></div></div><div>LAB. ODONTOTECNICO · CAGLIARI</div></div></div>
+    <div id="content"></div>
+  </div>
+  <noscript><div style="position:fixed;inset:0;z-index:30;background:#0A0A0B;color:#ECE6DC;display:flex;align-items:center;justify-content:center;padding:24px;font:400 16px/1.5 system-ui;text-align:center">Attardi &amp; Liggi — Laboratorio odontotecnico, Cagliari.<br>Questa demo richiede JavaScript.</div></noscript>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

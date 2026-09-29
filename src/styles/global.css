@@ -1,0 +1,43 @@
+html, body {
+  margin: 0;
+  background: #0A0A0B;
+  color: #ECE6DC;
+  font-family: 'Geist', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: #ECE6DC; text-decoration: none; }
+a:hover { color: #fff; }
+
+/* Reset for semantic buttons that keep the approved inline look */
+.u-btn {
+  appearance: none;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Visible keyboard focus (overrides inline outline:none on fields) */
+:focus-visible {
+  outline: 1px solid #3D63FF !important;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+input:focus-visible, textarea:focus-visible { outline-offset: 2px; }
+::placeholder { color: #5A5650; opacity: 1; }
+/* Inputs grow via flex:1; drop their intrinsic size=20 width so the form never overflows the gutter on narrow phones */
+#demo-form input { width: 0; }
+
+.comp-name:hover { color: #ECE6DC !important; }
+
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}

@@ -1,0 +1,16 @@
+/*
+  Layout variants (desktop ≥ 760px / mobile < 760px) are rendered by src/ui/template.js,
+  because the 3D choreography reads index-ordered DOM hooks and must only see one variant.
+  This file only holds device-level rules.
+*/
+@media (max-width: 759.98px) {
+  html { -webkit-text-size-adjust: 100%; }
+  /* Fixed footer: long scene labels + 120px track + "SCORRI" exceed phone widths; let only the track shrink */
+  .foot { gap: 12px; }
+  .foot-right { flex: 0 1 auto; min-width: 0; }
+  .foot-track { flex-shrink: 1; min-width: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
