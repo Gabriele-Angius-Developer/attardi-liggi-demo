@@ -162,8 +162,11 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     if (s.shown !== target && now - s.t >= DWELL) { s.prev = s.shown; s.shown += target > s.shown ? 1 : -1; s.t = now; s.tw = s.shown !== target ? now : -1e9; if (!live) s.g++; }
     return s.shown;
   }
-  // Same window as the data-fade opacity of section i (visible between i - .3 and i + .86).
-  const secLive = (i, P) => P > i - .3 && P < i + .86;
+  // Section text fades. Mobile: the outgoing text is gone (i + .72) before the next one starts (i + .76), since the
+  // stacked layout puts both in the same place; desktop keeps the original cross-fade.
+  const FADE_IN = () => mobile ? .24 : .3, FADE_OUT = () => mobile ? .6 : .62, FADE_END = () => mobile ? .72 : .86;
+  // Same window as the data-fade opacity of section i.
+  const secLive = (i, P) => P > i - FADE_IN() && P < i + FADE_END();
   let tops = [], hts = [];
   const measure = () => { tops = secs.map(s => s.getBoundingClientRect().top + scrollY); hts = secs.map(s => s.offsetHeight); };
   measure();
@@ -320,9 +323,12 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     renderer.render(scene, camera);
 
     /* ---- DOM ---- */
+    // Mobile: text positions follow the scroll at once while P is damped (~1 s behind), so section fades use the
+    // undamped scroll progress; otherwise a fast swipe moved a still-visible block under the next one's text.
+    const PF = mobile && !reduced && !(debug && window.__alP != null) ? target : P;
     for (const el of fades) {
-      const i = +el.dataset.fade; let o = i === 0 ? 1 : i === 10 ? seg(P, 9.84, 10) : seg(P, i - .3, i + .02);
-      if (i < 10) o = Math.min(o, 1 - seg(P, i + .62, i + .86));
+      const i = +el.dataset.fade; let o = i === 0 ? 1 : i === 10 ? seg(PF, 9.84, 10) : seg(PF, i - FADE_IN(), i + .02);
+      if (i < 10) o = Math.min(o, 1 - seg(PF, i + FADE_OUT(), i + FADE_END()));
       if (i === 0) o *= clamp((I - .3) / .6);
       if (reduced) o = 1;
       setO(el, o); const pe = o > .3 ? 'auto' : 'none'; if (el.style.pointerEvents !== pe) el.style.pointerEvents = pe;
@@ -331,7 +337,8 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     setT(foot, `${String(si + 1).padStart(2, '0')} / 11 — ${FOOT[si]}`); if (footBar) footBar.style.width = (P / 10 * 100).toFixed(2) + '%';
     const ho = mobile ? 0 : win(P, -1, 0, .4, .6) * clamp((I - .6) / .4);
     placeLbl(lbl.h1, wpos(teeth[7], LB.h1), ho); placeLbl(lbl.h2, wpos(teeth[3], LB.h2), ho);
-    const io = win(P, 2.08, 2.2, 2.52, 2.64);
+    // 3D labels sit on the (damped) scene but over scrolling text: shown only while scroll and scene agree.
+    const io = Math.min(win(P, 2.08, 2.2, 2.52, 2.64), win(PF, 2.08, 2.2, 2.52, 2.64));
     placeLbl(lbl.i0, wpos(crownG, LB.i0).addScaledVector(camRight, .62), io);
     placeLbl(lbl.i1, wpos(abut, LB.i1).addScaledVector(camRight, .36), io);
     placeLbl(lbl.i2, wpos(screw, LB.i2).addScaledVector(camRight, .14), io);
@@ -339,7 +346,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     const to = mobile ? 0 : win(P, 7.3, 7.42, 7.52, 7.62);
     placeLbl(lbl.t0, wpos(bar, LB.t0), to, true);
     placeLbl(lbl.t1, wpos(toronto, LB.t1), to);
-    placeLbl(lbl.c0, wpos(crownG, LB.c0).addScaledVector(camRight, .15), win(P, 4.4, 4.44, 4.56, 4.6));
+    placeLbl(lbl.c0, wpos(crownG, LB.c0).addScaledVector(camRight, .15), Math.min(win(P, 4.4, 4.44, 4.56, 4.6), win(PF, 4.4, 4.44, 4.56, 4.6)));
     // Scroll-highlighted lists go through a stepper, so a fast scroll never skips an item.
     if (P > 2.8 && P < 4.9) {
       const mk = STAGES[mi].k;
