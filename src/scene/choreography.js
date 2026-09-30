@@ -7,7 +7,7 @@ export const IMPL_SLOTS = [1, 3, 5, 8, 10, 12];        // Toronto implant positi
 
 // Service object screen targets (NDC) for desktop / mobile, their rotations, scales and hotspot offsets
 export const SERV_D = [[-.62, .3], [.6, .46], [.66, -.28], [.34, -.62], [-.56, -.42], [-.3, -.72]];
-export const SERV_M = [[-.6, .6], [0, .6], [.6, .6], [-.6, .18], [0, .18], [.6, .18]];
+export const SERV_M = [[-.6, .6], [0, .6], [.6, .6], [-.6, .33], [0, .33], [.6, .33]];
 export const SERV_RY = [.4, 0, -.25, .3, .6, .2];
 export const SERV_RX = [.25, .15, .45, .35, .3, .3];
 export const SERV_S = [1.35, 1.0, .6, 1.0, 1.35, 1.35];

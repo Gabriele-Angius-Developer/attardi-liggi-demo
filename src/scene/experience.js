@@ -42,7 +42,9 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   /* ---- service targets ---- */
   const servPos = SERV_D.map(() => V()), act = [1, 1, 1, 1, 1, 1];
   let T = 0;
-  const SV = [0, 1, 2, 3, 4, 5].map(k => () => pose(servPos[k].clone().add(V(0, .05 * Math.sin(T * .6 + k), 0)), E(SERV_RX[k], SERV_RY[k] + .12 * Math.sin(T * .25 + k), 0), SERV_S[k] * act[k] * (mobile ? .7 : 1)));
+  // Mobile service objects (scene 09) are drawn at SERV_MS of their desktop size; hotspot offsets scale with them.
+  const SERV_MS = .5;
+  const SV = [0, 1, 2, 3, 4, 5].map(k => () => pose(servPos[k].clone().add(V(0, .05 * Math.sin(T * .6 + k), 0)), E(SERV_RX[k], SERV_RY[k] + .12 * Math.sin(T * .25 + k), 0), SERV_S[k] * act[k] * (mobile ? SERV_MS : 1)));
 
   /* ---- arch teeth ---- */
   const heroFree = P => pose(V(), E(.3 * seg(P, 2.95, 3.25) - .08 * seg(P, 3.9, 4.1), .55 + .45 * (P - 1) - 1.2 * seg(P, 3, 3.62) + TAU * seg(P, 4.4, 4.52), 0), 1);
@@ -377,7 +379,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     const hv = win(P, 7.95, 8.05, 8.55, 8.68);
     hots.forEach((el, k) => {
       setO(el, hv); const pe = hv > .5 ? 'auto' : 'none'; if (el.style.pointerEvents !== pe) { el.style.pointerEvents = pe; el.tabIndex = hv > .5 ? 0 : -1; }
-      if (hv > .01) { const [x, y] = proj(tmpA.copy(servPos[k]).add(hotOff[k])); el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-50%)`; }
+      if (hv > .01) { const [x, y] = proj(tmpA.copy(servPos[k]).addScaledVector(hotOff[k], mobile ? SERV_MS : 1)); el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-50%)`; }
     });
     if (first) { first = false; if (loader) { loader.style.display = ''; loader.style.opacity = 0; loader.style.pointerEvents = 'none'; loaderTimer = setTimeout(() => loader.style.display = 'none', 1300); } }
   }

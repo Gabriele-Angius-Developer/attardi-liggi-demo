@@ -35,7 +35,7 @@ export function compDetail(s) {
   }).join('')}</div>`;
 }
 export function hotInner(s, i) {
-  const on = i === s.node, ring = s.mobile ? 92 : 170, fs = s.mobile ? 10 : 12;
+  const on = i === s.node, ring = s.mobile ? 64 : 170, fs = s.mobile ? 10 : 12;
   return `<div style="width:${ring}px;height:${ring}px;border-radius:50%;border:1px solid ${on ? B : 'rgba(236,230,220,.12)'};transition:border-color .4s"></div><div style="${CHIP}font:500 ${fs}px 'Geist Mono';letter-spacing:.1em;color:${on ? W : '#8E887F'};white-space:nowrap">${NODE_MAP[i][1]}</div>`;
 }
 export function nodePanel(s) {
@@ -59,7 +59,7 @@ ${lblBox('c0', DOT + line(70) + monoLbl('CONTROLLO · 360°'))}
 ${lblBox('t0', monoLbl('STRUTTURA') + line(80) + DOT)}
 ${lblBox('t1', DOT + line(80) + monoLbl('INTERFACCIA DI MATERIALE'))}
 </div>
-<div style="position:fixed;inset:0;z-index:4;pointer-events:none">${NODE_MAP.map(([, t], i) => `<button type="button" class="u-btn" data-hot="${i}" data-node="${i}" tabindex="-1" aria-label="Esplora ${esc(COMPS[NODE_MAP[i][0]][0])}" style="position:fixed;left:0;top:0;opacity:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none">${hotInner(s, i)}</button>`).join('')}</div>`;
+<div style="position:fixed;inset:0;z-index:4;pointer-events:none">${NODE_MAP.map(([, t], i) => `<button type="button" class="u-btn" data-hot="${i}" data-node="${i}" tabindex="-1" aria-label="Esplora ${esc(COMPS[NODE_MAP[i][0]][0])}" style="position:fixed;left:0;top:0;opacity:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:${s.mobile ? 6 : 12}px;pointer-events:none">${hotInner(s, i)}</button>`).join('')}</div>`;
 
   const chrome = `<div aria-hidden="true" style="position:fixed;inset:0;z-index:9;pointer-events:none"><div style="position:absolute;left:24px;top:24px;width:14px;height:14px;border-left:1px solid #5A5650;border-top:1px solid #5A5650"></div><div class="corner-br" style="position:absolute;right:24px;bottom:24px;width:14px;height:14px;border-right:1px solid #5A5650;border-bottom:1px solid #5A5650"></div></div>
 <header data-nav style="position:fixed;inset:0 0 auto 0;z-index:10;height:72px;padding:0 ${PADX};display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid transparent;transition:background .4s,border-color .4s">
