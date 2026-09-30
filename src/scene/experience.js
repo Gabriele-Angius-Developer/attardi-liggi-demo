@@ -45,7 +45,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   const SV = [0, 1, 2, 3, 4, 5].map(k => () => pose(servPos[k].clone().add(V(0, .05 * Math.sin(T * .6 + k), 0)), E(SERV_RX[k], SERV_RY[k] + .12 * Math.sin(T * .25 + k), 0), SERV_S[k] * act[k] * (mobile ? .7 : 1)));
 
   /* ---- arch teeth ---- */
-  const heroFree = P => pose(V(), E(.3 * seg(P, 2.95, 3.25) - .08 * seg(P, 3.9, 4.1), .55 + .45 * (P - 1) + 1.6 * seg(P, 3, 3.62) + TAU * seg(P, 4.4, 4.52), 0), 1);
+  const heroFree = P => pose(V(), E(.3 * seg(P, 2.95, 3.25) - .08 * seg(P, 3.9, 4.1), .55 + .45 * (P - 1) - 1.2 * seg(P, 3, 3.62) + TAU * seg(P, 4.4, 4.52), 0), 1);
   const SHIFT = SLOT[HERO_SLOT].p.clone().negate().add(V(0, -.4, -3.5));
   const teeth = ORDER.map((k, i) => {
     const m = new THREE.Mesh(G.slotGeo(k, i), MK.ceramic()); scene.add(m);
