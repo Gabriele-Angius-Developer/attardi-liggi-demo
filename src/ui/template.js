@@ -114,13 +114,18 @@ ${D ? `<div style="display:flex;flex-direction:column;border-bottom:1px solid rg
 ${D ? `<div data-clip aria-hidden="true" style="align-self:flex-end;font:400 11px 'Geist Mono';letter-spacing:.12em;color:#5A5650">STATO · CERAMICA</div>` : ''}
 </div></div></section>`;
 
+  // Scene 05 fit: on phones, step number, step gap, list height and the 3D space above the text shrink linearly
+  // with the viewport height below ~930px (unchanged above), so the 6-step bar stays on screen above the footer.
+  const WF = M
+    ? { ol: `clamp(224px,calc(${VH(22)} + 56px),263px)`, gap: `clamp(10px,calc(${VH(4)} - 21.2px),16px)`, num: `clamp(72px,calc(${VH(16)} - 52.8px),96px)`, space: `clamp(${VH(15.5)},calc(${VH(66.77)} - 342px),${VH(30)})` }
+    : { ol: '320px', gap: '16px', num: `clamp(96px,min(${VW(16)},${VH(26)}),240px)`, space: VH(30) };
   const s4 = `<section id="workflow" data-sec="4" aria-label="Processo" style="height:${VH(440)};position:relative">
 <div style="${sticky('110px', 'display:flex;flex-direction:column')}">
 <div data-fade="4" style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:24px;opacity:0">
 <div style="display:flex;flex-wrap:wrap-reverse;flex:1;gap:24px">
 <div style="flex:1 1 440px;max-width:560px;display:flex;flex-direction:column;gap:12px"><h2 style="margin:0;${HEAD}">05 / PROCESSO</h2><p style="margin:0;font:300 15px/1.5 'Geist';color:#B9B3A9;max-width:500px;text-wrap:pretty">Esempio: protesi su impianto. Ogni lavorazione segue un proprio processo, non sempre digitale.</p>
-<ol style="list-style:none;margin:0;padding:0;position:relative;flex:1;min-height:${M ? 263 : 320}px">${STEPS.map(([n, t, d], i) => `<li data-wstep="${i}" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:16px;opacity:0;transition:opacity .5s"><div aria-hidden="true" style="margin-left:-6px;font:500 clamp(96px,min(${VW(16)},${VH(26)}),240px)/.85 'Geist';letter-spacing:-.06em">${n}</div><h3 style="margin:0;font:500 clamp(30px,${VW(3.3)},48px)/1 'Geist';letter-spacing:-.04em">${t.toUpperCase()}</h3><p style="margin:0;max-width:500px;font:300 18px/1.55 'Geist';color:#B9B3A9;text-wrap:pretty">${d}</p></li>`).join('')}</ol></div>
-<div style="flex:1 1 360px;min-height:${VH(30)}"></div></div>
+<ol style="list-style:none;margin:0;padding:0;position:relative;flex:1;min-height:${WF.ol}">${STEPS.map(([n, t, d], i) => `<li data-wstep="${i}" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:${WF.gap};opacity:0;transition:opacity .5s"><div aria-hidden="true" style="margin-left:-6px;font:500 ${WF.num}/.85 'Geist';letter-spacing:-.06em">${n}</div><h3 style="margin:0;font:500 clamp(30px,${VW(3.3)},48px)/1 'Geist';letter-spacing:-.04em">${t.toUpperCase()}</h3><p style="margin:0;max-width:500px;font:300 18px/1.55 'Geist';color:#B9B3A9;text-wrap:pretty">${d}</p></li>`).join('')}</ol></div>
+<div style="flex:1 1 360px;min-height:${WF.space}"></div></div>
 <div aria-hidden="true" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px">${STEPS.map(([n, t], i) => `<div data-wbar="${i}" style="padding-top:12px;border-top:2px solid rgba(236,230,220,.5);opacity:.3;font:500 11px 'Geist Mono';letter-spacing:.1em;transition:opacity .4s,border-color .4s">${M ? n : n + ' — ' + t.toUpperCase()}</div>`).join('')}</div>
 </div></div></section>`;
 
