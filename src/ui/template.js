@@ -101,7 +101,7 @@ ${M ? `<div style="display:flex;flex-wrap:wrap;gap:6px 14px;padding-top:12px;bor
 ${D ? `<div data-fade="2" aria-hidden="true" style="flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:8px;font:400 11px 'Geist Mono';color:#5A5650;letter-spacing:.1em;opacity:0"><div data-explode>ESPLOSO · 0%</div><div style="width:9px;height:260px;border-right:1px solid rgba(236,230,220,.3);background:repeating-linear-gradient(180deg,rgba(236,230,220,.3) 0 1px,transparent 1px 26px);position:relative"><div data-explodebar style="position:absolute;right:-1px;top:0;width:2px;height:0%;background:#3D63FF"></div></div></div>` : ''}
 </div></section>`;
 
-  const s3 = `<section id="materiali" data-sec="3" aria-label="Materiali" style="height:${VH(340)};position:relative">
+  const s3 = `<section id="materiali" data-sec="3" aria-label="Materiali" style="height:${VH(520)};position:relative">
 <div style="${sticky('110px', 'display:flex;flex-wrap:wrap-reverse;align-items:stretch;gap:24px')}">
 <div data-fade="3" style="flex:0 1 380px;display:flex;flex-direction:column;justify-content:space-between;gap:24px;opacity:0">
 <div style="display:flex;flex-direction:column;gap:16px"><p style="margin:0;font:300 17px/1.55 'Geist';color:#B9B3A9;text-wrap:pretty">La scelta del materiale nasce dal caso: resistenza, estetica, spessori disponibili e tipo di supporto.</p><div data-matlabel aria-live="off" style="font:500 11px 'Geist Mono';letter-spacing:.12em;color:#3D63FF">3D · CORONA — CERAMICA</div></div>

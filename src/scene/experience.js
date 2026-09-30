@@ -148,15 +148,18 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   // It jumps straight to the target while its section is not visible, with reduced motion, and on the first frame.
   // Plain numbers and timestamps only: nothing is allocated per frame.
   const DWELL = 180;
-  const mkStep = () => ({ shown: -1, target: -1, t: 0 });
+  // prev: index shown before the last step; tw: time of the last step taken while still behind the target (else -1e9)
+  const mkStep = () => ({ shown: -1, target: -1, t: 0, prev: -1, g: 0, tw: -1e9 });
   const stMat = mkStep(), stW = mkStep(), stImp = mkStep(), stB = mkStep(), stT = mkStep(), stC = mkStep();
   // Scene 06 competences: the hold P 5.02–5.58 is split into 6 equal parts, one item each (6.1 → 6.6).
   const COMP_A = 5.02, COMP_STEP = (5.58 - COMP_A) / 6;
   let compShown = -1;
-  function stepTo(s, target, now, live) {
+  // grace: steps still walked one at a time after the section stops being visible, before the jump (scene 04 only).
+  function stepTo(s, target, now, live, grace = 0) {
     s.target = target;
-    if (reduced || !live || s.shown < 0) { if (s.shown !== target) { s.shown = target; s.t = now; } return target; }
-    if (s.shown !== target && now - s.t >= DWELL) { s.shown += target > s.shown ? 1 : -1; s.t = now; }
+    if (live) s.g = 0;
+    if (reduced || s.shown < 0 || (!live && s.g >= grace)) { if (s.shown !== target) { s.prev = s.shown; s.shown = target; s.t = now; s.tw = -1e9; } return target; }
+    if (s.shown !== target && now - s.t >= DWELL) { s.prev = s.shown; s.shown += target > s.shown ? 1 : -1; s.t = now; s.tw = s.shown !== target ? now : -1e9; if (!live) s.g++; }
     return s.shown;
   }
   // Same window as the data-fade opacity of section i (visible between i - .3 and i + .86).
@@ -215,6 +218,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   const LB = { h1: V(0, 1.05, .1), h2: V(0, .45, .45), i0: V(0, .3, 0), i1: V(0, .05, 0), i2: V(0, -.4, 0), i3: V(0, -1.3, 0), c0: V(0, .78, 0),
     t0: V(SLOT[2].p.x * .95, 0, SLOT[2].p.z * .95), t1: V(SLOT[10].p.x * 1.1, .05, SLOT[10].p.z * 1.1), crown: V(0, .21, 0) };
   const AX = { x: V(1, 0, 0), y: V(0, 1, 0) }, AXn = { x: V(-1, 0, 0), y: V(0, -1, 0) };
+  const MAT_END = STAGES.find(s => s.ax === 'y').a; // scene 04 materials end where the scene 05 (y-axis) sweep starts
 
   function frame(now) {
     raf = requestAnimationFrame(frame);
@@ -270,18 +274,28 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     const ip = win(P, 1.62, 1.95, 2.85, 3.02); tiPart.opacity = ip; abut.visible = screw.visible = fixture.visible = ip > .002;
 
     let ci = 0; for (let s = 1; s < STAGES.length; s++) if (P >= STAGES[s].a) ci = s;
-    const S = STAGES[ci]; let fromK = null, f = 1;
+    let S = STAGES[ci], fromK = null, f = 1;
     if (ci > 0 && P < S.b) { fromK = STAGES[ci - 1].k; f = clamp((P - S.a) / (S.b - S.a)); }
+    // Scene 04: the list stepper also drives the crown, so list and crown always advance together, one material at a time.
+    // While it lags behind P (fast scroll) each step plays a DWELL-long wipe from the previous material.
+    const mi = P > 2.8 && P < 4.9 ? stepTo(stMat, fromK && f < .5 ? ci - 1 : ci, now, secLive(3, P), 3) : -1;
+    const catching = mi >= 0 && mi !== stMat.target;
+    let sax = S.ax;
+    if (catching && P < MAT_END) {
+      const pk = stMat.prev, tt = clamp((now - stMat.tw) / DWELL);
+      S = STAGES[mi]; sax = STAGES[Math.max(mi, pk)].ax || 'x'; fromK = tt < 1 && pk >= 0 ? STAGES[pk].k : null; f = tt;
+    }
     for (const [k, ms] of VARe) for (const m of ms) m.visible = k === S.k || k === fromK;
     for (const m of HMs) m.clippingPlanes = CLIP_OFF;
     if (fromK && fromK !== S.k) {
-      const ax = AX[S.ax], c = crownG.localToWorld(tmpA.copy(LB.crown)), R = .72, cut = ax.dot(c) + lerp(-R, R, f);
-      planeTo.set(AXn[S.ax], cut); planeFrom.set(ax, -cut);
+      const ax = AX[sax], c = crownG.localToWorld(tmpA.copy(LB.crown)), R = .72, cut = ax.dot(c) + lerp(-R, R, f);
+      planeTo.set(AXn[sax], cut); planeFrom.set(ax, -cut);
       for (const m of VAR[S.k]) m.material.clippingPlanes = CLIP_TO; for (const m of VAR[fromK]) m.material.clippingPlanes = CLIP_FROM;
-      scan.visible = true; scan.position.copy(c).addScaledVector(ax, lerp(-R, R, f)); scan.rotation.set(S.ax === 'y' ? -Math.PI / 2 : 0, S.ax === 'x' ? Math.PI / 2 : 0, 0);
+      scan.visible = true; scan.position.copy(c).addScaledVector(ax, lerp(-R, R, f)); scan.rotation.set(sax === 'y' ? -Math.PI / 2 : 0, sax === 'x' ? Math.PI / 2 : 0, 0);
       scanMat.opacity = .08 * Math.sin(Math.PI * f); scanLine.opacity = .85 * Math.sin(Math.PI * f);
     } else scan.visible = false;
     const shownK = fromK && f < .5 ? fromK : S.k;
+    if (debug) window.__alCrown = shownK; // QA: material the crown currently shows
 
     const cop = seg(P, 4.45, 4.75);
     for (const m of clones) { m.visible = cop > .002; if (m.visible) { m.material.opacity = cop; setPose(m, track(P, m.userData.keys)); } }
@@ -328,7 +342,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     placeLbl(lbl.c0, wpos(crownG, LB.c0).addScaledVector(camRight, .15), win(P, 4.4, 4.44, 4.56, 4.6));
     // Scroll-highlighted lists go through a stepper, so a fast scroll never skips an item.
     if (P > 2.8 && P < 4.9) {
-      const mi = stepTo(stMat, fromK && f < .5 ? ci - 1 : ci, now, secLive(3, P)), mk = STAGES[mi].k, catching = mi !== stMat.target;
+      const mk = STAGES[mi].k;
       for (const el of mkEls) setO(el, el.dataset.mk === mk ? 1 : .18);
       setT(matLabel, `3D · CORONA — ${MAT_LABEL[mk]}`);
       setT(clipLabel, fromK && !catching ? `CLIPPING PLANE ${S.ax.toUpperCase()} = ${Math.round(f * 100)}%` : `STATO · ${MAT_LABEL[mk]}`);
