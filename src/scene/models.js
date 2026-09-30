@@ -1,13 +1,13 @@
-// Procedural placeholder geometry.
-// To swap in real dental assets later, return GLTF-loaded geometries/meshes under the SAME keys
-// (tooth.*, root, abutment, screw, fixture, fixtureTop) and keep builders' signatures:
+// Tooth geometry: real anatomy from ./dentalAssets.js when loaded, procedural fallback otherwise.
+// Keys (tooth.*, root, abutment, screw, fixture, fixtureTop) and builder signatures are stable:
 // the choreography only reads poses, opacity and materials, never geometry internals.
 import * as THREE from 'three';
 import { V, sstep } from './math.js';
+import { dentalAssets, mirrorX } from './dentalAssets.js';
 
 export const PRESET = {
   incisor: { w: .86, d: .62, h: 1.02, ey: .8, t: 'inc' }, lateral: { w: .7, d: .56, h: .9, ey: .8, t: 'inc' },
-  canine: { w: .8, d: .74, h: 1.0, ey: .75, t: 'can' }, pm: { w: .74, d: .86, h: .78, ey: .55, t: 'pm' },
+  canine: { w: .8, d: .74, h: 1.0, ey: .75, t: 'can' }, pm: { w: .74, d: .86, h: .78, ey: .55, t: 'pm' }, pm2: { w: .74, d: .86, h: .78, ey: .55, t: 'pm' },
   molar: { w: 1.04, d: 1.0, h: .72, ey: .5, t: 'mol' }, molar2: { w: .96, d: .96, h: .68, ey: .5, t: 'mol' },
 };
 
@@ -46,10 +46,29 @@ function fixtureProfile() {
 }
 const lathe = (pts, n) => new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), n);
 
+// PRESET key -> extracted piece; molar2 has no library source, derived from the first molar
+const REAL = { incisor: 'central', lateral: 'lateral', canine: 'canine', pm: 'pm1', pm2: 'pm2', molar: 'molar', molar2: 'molar' };
+const M2 = [.9, .93, .95];
+
 export function buildModels(lo) {
-  const ws = lo ? 44 : 72, hs = lo ? 30 : 48, M = { tooth: {} };
-  for (const k in PRESET) M.tooth[k] = toothGeo(PRESET[k], ws, hs);           // arch teeth + crown
-  M.root = lathe([[.001, -1.55], [.12, -1.45], [.28, -1.0], [.4, -.45], [.46, -.1], [.47, 0]], 40); // root
+  const ws = lo ? 44 : 72, hs = lo ? 30 : 48, M = { tooth: {}, toothL: {}, real: false };
+  const A = dentalAssets();
+  if (A) {
+    M.real = true;
+    for (const k in REAL) {
+      const src = A.meta.pieces[REAL[k]], g = A.geo[REAL[k]].clone(), s = k === 'molar2' ? M2 : [1, 1, 1];
+      if (k === 'molar2') { g.scale(...s); g.computeVertexNormals(); }
+      M.tooth[k] = g; M.toothL[k] = mirrorX(g);
+      Object.assign(PRESET[k], { w: src.w * s[0], d: src.d * s[2], h: src.h * s[1] });
+    }
+    M.root = A.geo.root; M.rootScale = [.975, 1, .975]; // inset so the crown/root overlap doesn't z-fight
+  } else {
+    for (const k in PRESET) M.tooth[k] = M.toothL[k] = toothGeo(PRESET[k], ws, hs);
+    M.root = lathe([[.001, -1.55], [.12, -1.45], [.28, -1.0], [.4, -.45], [.46, -.1], [.47, 0]], 40);
+    M.rootScale = [PRESET.molar.w * .85, 1, PRESET.molar.d * .85];
+  }
+  // arch slots 0-6 sit on the mirrored side (local +X mesial), 7-13 use the source side (local +X distal)
+  M.slotGeo = (k, i) => (i < 7 ? M.toothL : M.tooth)[k];
   M.abutment = lathe([[.001, -.42], [.2, -.42], [.23, -.3], [.3, -.12], [.3, -.06], [.24, -.02], [.2, .3], [.16, .42], [.001, .44]], 48);
   M.screw = lathe([[.001, -.9], [.05, -.88], [.05, 0], [.09, .02], [.1, .1], [.001, .12]], 24);
   M.fixture = lathe(fixtureProfile(), 48);                                    // implant

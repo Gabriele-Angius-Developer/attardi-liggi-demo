@@ -1,4 +1,5 @@
 import { createExperience } from './scene/experience.js';
+import { loadDentalAssets } from './scene/dentalAssets.js';
 import { renderApp } from './ui/template.js';
 import { bindInteractions } from './ui/interactions.js';
 import { applyComp } from './ui/comp.js';
@@ -81,6 +82,9 @@ reducedMQ.addEventListener?.('change', () => boot());
 bindInteractions({ app, state, getExperience: () => exp });
 
 if (document.fonts?.ready) document.fonts.ready.then(() => { if (exp) dispatchEvent(new Event('resize')); });
-boot();
+content.innerHTML = renderApp(state);
+setViewportVars();
+// Real tooth geometry (public/models/teeth.bin) must be ready before the scene is built; on failure models.js falls back to procedural teeth.
+loadDentalAssets().then(boot);
 
 if (DEBUG) window.__al = { boot, state, get exp() { return exp; } };

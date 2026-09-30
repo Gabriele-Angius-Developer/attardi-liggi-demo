@@ -48,7 +48,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   const heroFree = P => pose(V(), E(.3 * seg(P, 2.95, 3.25) - .08 * seg(P, 3.9, 4.1), .55 + .45 * (P - 1) + 1.6 * seg(P, 3, 3.62) + TAU * seg(P, 4.4, 4.52), 0), 1);
   const SHIFT = SLOT[HERO_SLOT].p.clone().negate().add(V(0, -.4, -3.5));
   const teeth = ORDER.map((k, i) => {
-    const m = new THREE.Mesh(G.tooth[k], MK.ceramic()); scene.add(m);
+    const m = new THREE.Mesh(G.slotGeo(k, i), MK.ceramic()); scene.add(m);
     const st = .012 * Math.abs(i - 6.5), sl = slotFns[i], seed = i * 1.7;
     const sh = () => pose(SLOT[i].p.clone().add(SHIFT), SLOT[i].q.clone(), 1);
     const dp = () => pose(SLOT[i].p.clone().add(V(0, .2, -9)), SLOT[i].q.clone().multiply(E(Math.sin(seed), seed, 0)), 1);
@@ -60,7 +60,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     m.userData = { keys, st, svc, base: m.material.color.clone() };
     return m;
   });
-  const wireTooth = new THREE.Mesh(G.tooth[ORDER[3]], MK.wire()); wireTooth.scale.setScalar(1.004); teeth[3].add(wireTooth);
+  const wireTooth = new THREE.Mesh(G.slotGeo(ORDER[3], 3), MK.wire()); wireTooth.scale.setScalar(1.004); teeth[3].add(wireTooth);
   const pmmaCol = new THREE.Color('#e4c9a6');
 
   /* ---- hero rig: crown (material variants) + root + implant, abutment, screw ---- */
@@ -74,7 +74,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   HMs.forEach(m => m.clippingPlanes = CLIP_OFF);
   Object.values(VAR).flat().forEach(m => { m.visible = false; crownG.add(m); });
   const rootMat = MK.dentin(), rootPlane = new THREE.Plane(V(0, 1, 0), 1000); rootMat.clippingPlanes = [rootPlane];
-  const rootM = new THREE.Mesh(G.root, rootMat); rootM.scale.set(PRESET.molar.w * .85, 1, PRESET.molar.d * .85); hero.add(rootM);
+  const rootM = new THREE.Mesh(G.root, rootMat); rootM.scale.set(...G.rootScale); hero.add(rootM);
   const tiPart = MK.ti();
   const abut = new THREE.Mesh(G.abutment, tiPart), screw = new THREE.Mesh(G.screw, tiPart), fixture = new THREE.Mesh(G.fixture, tiPart);
   hero.add(abut, screw, fixture);
@@ -97,7 +97,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
     return j === 3 ? [[.6, sl], [1, heroFree], [4.6, heroFree], ...tail] : [[4.45, dep], ...tail];
   };
   const heroKeys = mkMember(3);
-  const clones = [0, 1, 2].map(j => { const m = new THREE.Mesh(G.tooth[ORDER[BRIDGE_SLOTS[j]]], MK.ceramic()); m.userData.keys = mkMember(j); scene.add(m); return m; });
+  const clones = [0, 1, 2].map(j => { const m = new THREE.Mesh(G.slotGeo(ORDER[BRIDGE_SLOTS[j]], BRIDGE_SLOTS[j]), MK.ceramic()); m.userData.keys = mkMember(j); scene.add(m); return m; });
   const connMat = MK.ceramic();
   const conns = [0, 1, 2].map(() => { const m = new THREE.Mesh(G.connector, connMat); scene.add(m); return m; });
 
@@ -377,7 +377,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
       removeEventListener('scroll', onScroll); removeEventListener('pointermove', onMouse); removeEventListener('resize', onResize);
       const geos = new Set(), mats = new Set();
       scene.traverse(o => { if (o.geometry) geos.add(o.geometry); [].concat(o.material || []).forEach(m => mats.add(m)); });
-      Object.values(G.tooth).forEach(g => geos.add(g)); Object.values(G).forEach(g => g?.isBufferGeometry && geos.add(g));
+      [G.tooth, G.toothL].forEach(o => Object.values(o).forEach(g => geos.add(g))); Object.values(G).forEach(g => g?.isBufferGeometry && geos.add(g));
       geos.forEach(g => g.dispose()); mats.forEach(m => m.dispose());
       envRT.dispose(); scene.environment = null;
       renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();

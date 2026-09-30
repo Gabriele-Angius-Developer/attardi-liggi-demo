@@ -1,5 +1,5 @@
 // Scene timeline constants. Progress P runs 0..10 (one unit per scene).
-export const ORDER = ['molar2', 'molar', 'pm', 'pm', 'canine', 'lateral', 'incisor', 'incisor', 'lateral', 'canine', 'pm', 'pm', 'molar', 'molar2'];
+export const ORDER = ['molar2', 'molar', 'pm2', 'pm', 'canine', 'lateral', 'incisor', 'incisor', 'lateral', 'canine', 'pm', 'pm2', 'molar', 'molar2'];
 export const BRIDGE_SLOTS = [9, 10, 11, 12];
 export const HERO_SLOT = 12;
 export const SVC_TOOTH = { 6: 0, 1: 4, 3: 5 };        // arch tooth index -> service slot
