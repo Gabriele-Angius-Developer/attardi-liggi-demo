@@ -79,6 +79,8 @@ export function buildModels(lo) {
 
 /* Arch layout: slot poses along an elliptic arch, centred on the origin */
 export function buildArchSlots(order, pose, E) {
+  const A0 = dentalAssets();
+  if (A0?.meta.slots) return libArchSlots(order, pose, A0.meta.slots);
   const A = 2.35, B = 3.0, tbl = []; let acc = 0, prev = null;
   for (let i = 0; i <= 4000; i++) { const th = -2.5 + 5 * i / 4000, p = V(A * Math.sin(th), 0, B * Math.cos(th)); if (prev) acc += p.distanceTo(prev); tbl.push([th, acc]); prev = p; }
   const s0 = tbl.find(([th]) => th >= 0)[1], gap = .03, widths = order.map(k => PRESET[k].w);
@@ -90,6 +92,23 @@ export function buildArchSlots(order, pose, E) {
   });
   const ctr = new THREE.Box3().setFromPoints(raw.map(s => s.p)).getCenter(V());
   return { slots: raw.map(s => pose(s.p.clone().sub(ctr), E(0, s.ry, 0), 1)), widths };
+}
+
+/* Arch from the exocad library set-up (ideal alignment, contacts, curve of Spee), mirrored for symmetry.
+   Slots store the source-side (x>0) tooth frames; molar2 is extrapolated distally from the molar. */
+function libArchSlots(order, pose, S) {
+  const src = k => {
+    if (k !== 'molar2') return S[REAL[k]];
+    const m = S.molar, d = PRESET.molar.w / 2 + PRESET.molar2.w / 2 + .02;
+    return { p: m.p.map((v, a) => v + m.x[a] * d), q: m.q };
+  };
+  const raw = order.map((k, i) => {
+    const s = src(k), p = V(...s.p), q = new THREE.Quaternion(...s.q);
+    if (i < 7) { p.x = -p.x; q.y = -q.y; q.z = -q.z; }
+    return { p, q };
+  });
+  const ctr = new THREE.Box3().setFromPoints(raw.map(s => s.p)).getCenter(V()); ctr.y = 0;
+  return { slots: raw.map(s => pose(s.p.sub(ctr), s.q, 1)), widths: order.map(k => PRESET[k].w) };
 }
 
 /* Toronto / full-arch structure: gingiva + titanium bar + implants */
