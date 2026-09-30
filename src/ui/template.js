@@ -152,8 +152,13 @@ ${D ? `<div data-clip aria-hidden="true" style="align-self:flex-end;font:400 11p
 
   const s8 = `<section data-sec="8" aria-label="Esplora le competenze" style="height:${VH(260)};position:relative">
 <div style="${sticky('100px', 'display:flex;flex-direction:column')}">
-<h2 data-fade="8" style="margin:0;max-width:420px;${HEAD};opacity:0">09 / ESPLORA LE COMPETENZE</h2>
-<div style="flex:1;display:flex;align-items:${M ? 'flex-end' : 'center'};justify-content:center"><div data-fade="8" id="node-panel" aria-live="polite" style="width:min(400px,100%);padding:24px 0;border-top:1px solid #3D63FF;display:flex;flex-direction:column;gap:14px;opacity:0">${nodePanel(s)}</div></div>
+${M
+    // Mobile: the heading sits under the hotspot grid, as the header of the open item (its line replaces the panel's).
+    ? `<div style="flex:1;display:flex;align-items:flex-end;justify-content:center"><div style="width:min(400px,100%);display:flex;flex-direction:column">
+<h2 data-fade="8" style="margin:0;${HEAD};padding-bottom:8px;border-bottom-color:#3D63FF;opacity:0">09 / ESPLORA LE COMPETENZE</h2>
+<div data-fade="8" id="node-panel" aria-live="polite" style="padding:12px 0 0;display:flex;flex-direction:column;gap:14px;opacity:0">${nodePanel(s)}</div></div></div>`
+    : `<h2 data-fade="8" style="margin:0;max-width:420px;${HEAD};opacity:0">09 / ESPLORA LE COMPETENZE</h2>
+<div style="flex:1;display:flex;align-items:center;justify-content:center"><div data-fade="8" id="node-panel" aria-live="polite" style="width:min(400px,100%);padding:24px 0;border-top:1px solid #3D63FF;display:flex;flex-direction:column;gap:14px;opacity:0">${nodePanel(s)}</div></div>`}
 </div></section>`;
 
   const s9 = `<section data-sec="9" aria-hidden="true" style="height:${VH(200)};position:relative">
