@@ -20,12 +20,15 @@ export const CONSTP = [[-1.55, .55, -.5, .4, 1.2, -.2], [1.55, .7, -.9, -.3, .4,
 export const HOLD = [.3, 1.4, 2.5, 3.2, 4.25, 5.3, 6.45, 7.5, 8.3, 9.55, 10];
 
 // Crown material sweep (clipping-plane transitions)
+// Scene 04 list: 10 materials in list order, step .058, transition .048, all within the sticky hold (P 3.0-3.6).
 export const STAGES = [
   { k: 'ceramic', a: -9, b: -9 },
-  { k: 'zirc', a: 3.03, b: 3.13, ax: 'x' }, { k: 'emax', a: 3.15, b: 3.25, ax: 'x' }, { k: 'ti', a: 3.27, b: 3.37, ax: 'x' },
-  { k: 'pmma', a: 3.39, b: 3.49, ax: 'x' }, { k: 'ceramic', a: 3.51, b: 3.61, ax: 'x' },
+  { k: 'zirc', a: 3.03, b: 3.078, ax: 'x' }, { k: 'emax', a: 3.088, b: 3.136, ax: 'x' }, { k: 'ti', a: 3.146, b: 3.194, ax: 'x' },
+  { k: 'cocr', a: 3.204, b: 3.252, ax: 'x' }, { k: 'peek', a: 3.262, b: 3.31, ax: 'x' }, { k: 'biohpp', a: 3.32, b: 3.368, ax: 'x' },
+  { k: 'pmma', a: 3.378, b: 3.426, ax: 'x' }, { k: 'comp', a: 3.436, b: 3.484, ax: 'x' }, { k: 'resin', a: 3.494, b: 3.542, ax: 'x' },
+  { k: 'ceramic', a: 3.552, b: 3.6, ax: 'x' },
   { k: 'points', a: 4.02, b: 4.1, ax: 'y' }, { k: 'wire', a: 4.12, b: 4.2, ax: 'y' },
   { k: 'zircRaw', a: 4.22, b: 4.3, ax: 'y' }, { k: 'ceramic', a: 4.32, b: 4.4, ax: 'y' },
 ];
-export const MAT_LABEL = { ceramic: 'CERAMICA', zirc: 'ZIRCONIA', emax: 'DISILICATO DI LITIO', ti: 'TITANIO', pmma: 'PMMA', points: 'NUVOLA DI PUNTI', wire: 'WIREFRAME CAD', zircRaw: 'ZIRCONIA GREZZA' };
+export const MAT_LABEL = { ceramic: 'CERAMICA', zirc: 'ZIRCONIA', emax: 'DISILICATO DI LITIO', ti: 'TITANIO', cocr: 'COCR', peek: 'PEEK', biohpp: 'BIOHPP', pmma: 'PMMA', comp: 'COMPOSITO', resin: 'RESINA', points: 'NUVOLA DI PUNTI', wire: 'WIREFRAME CAD', zircRaw: 'ZIRCONIA GREZZA' };
 export const FOOT = ['ARCATA', 'DENTE', 'IMPIANTO ESPLOSO', 'CORONA · MATERIALI', 'CORONA · PROCESSO', 'ELEMENTI MULTIPLI', 'PONTE', 'STRUTTURA COMPLETA', 'ELEMENTI SCOMPOSTI', 'RIASSEMBLAGGIO', 'ARCATA'];

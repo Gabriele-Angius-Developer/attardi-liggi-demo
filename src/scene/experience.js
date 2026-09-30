@@ -66,7 +66,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   /* ---- hero rig: crown (material variants) + root + implant, abutment, screw ---- */
   const hero = new THREE.Group(), crownG = new THREE.Group(); hero.add(crownG); scene.add(hero);
   const HM = {}, VAR = {};
-  for (const k of ['ceramic', 'zirc', 'zircRaw', 'emax', 'ti', 'pmma', 'cad']) { HM[k] = MK[k](); VAR[k] = [new THREE.Mesh(G.tooth.molar, HM[k])]; }
+  for (const k of ['ceramic', 'zirc', 'zircRaw', 'emax', 'ti', 'cocr', 'peek', 'biohpp', 'pmma', 'comp', 'resin', 'cad']) { HM[k] = MK[k](); VAR[k] = [new THREE.Mesh(G.tooth.molar, HM[k])]; }
   HM.cadDark = MK.cadDark(); HM.wire = MK.wire(); HM.points = MK.points();
   VAR.wire = [new THREE.Mesh(G.tooth.molar, HM.cadDark), new THREE.Mesh(G.tooth.molar, HM.wire)];
   VAR.points = [new THREE.Points(G.tooth.molar, HM.points)];
