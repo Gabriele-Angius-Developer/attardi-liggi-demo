@@ -12,8 +12,8 @@ export const NODE_MAP = [[2, 'CERAMICA'], [0, 'IMPIANTO'], [1, 'PONTE'], [3, 'MO
 export const STEPS = [
   ['01', 'Caso', 'Arrivano scansioni, impronte e indicazioni dello studio. Si definisce insieme la soluzione.'],
   ['02', 'Progetto', 'La corona prende forma in digitale: anatomia, spessori, connessioni, occlusione.'],
-  ['03', 'Produzione', 'La geometria diventa materiale. Il piano di taglio attraversa l\u2019oggetto.'],
-  ['04', 'Finitura', 'Superficie, colore e caratterizzazione vengono costruiti a mano.'],
+  ['03', 'Produzione', 'La geometria diventa materia. Il file digitale prende forma attraverso processi di lavorazione, passando dal progetto alla sua realizzazione.'],
+  ['04', 'Finitura', 'Ulteriori interventi di perfezionamento, colore e caratterizzazione vengono eseguiti manualmente, fino alla finitura definitiva.'],
   ['05', 'Controllo', 'Verifica di adattamento, contatti e superfici prima della consegna.'],
   ['06', 'Collaborazione', 'Il restauro torna allo studio e diventa parte del caso.'],
 ];
