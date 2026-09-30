@@ -1,12 +1,14 @@
 // Camera keys: one resting framing per scene (0..10). m* = mobile overrides.
-import { ease, lerp, win } from './math.js';
+// mshort: mobile override for short screens; from mshort.h[1] px of height down to mshort.h[0] px it blends linearly
+// from msy/mr to mshort.msy/mshort.mr (scene 05: the crown must clear the heading on iPhone SE).
+import { clamp, ease, lerp, win } from './math.js';
 
 export const KD = [
   { r: 8.6, az: .3, el: .62, t: [0, .15, .2], sx: .24, sy: .02, wide: 1, msy: .27 },
   { r: 5.6, az: .75, el: .1, t: [0, -.32, 0], sx: -.2, sy: 0 },
   { r: 12, az: .3, el: .06, t: [0, -.55, 0], sx: .02, sy: -.03, msx: -.2, msy: .15, mr: 1.55 },
   { r: 3.9, az: .5, el: .42, t: [0, .25, 0], sx: -.06, sy: .02, msy: .1, mr: 1.75 },
-  { r: 4.5, az: .4, el: .3, t: [0, .25, 0], sx: .2, sy: 0, msy: .295, mr: 2.25 },
+  { r: 4.5, az: .4, el: .3, t: [0, .25, 0], sx: .2, sy: 0, msy: .26, mr: 1.75, mshort: { h: [667, 844], msy: .295, mr: 2.25 } },
   { r: 9.5, az: .2, el: .2, t: [0, 0, 0], sx: .22, sy: .08 },
   { r: 7.4, az: 0, el: .18, t: [0, 0, 0], sx: .08, sy: -.07 },
   { r: 14.4, az: -.2, el: .42, t: [0, -.5, 0], sx: 0, sy: -.1, wide: 1, msy: .02, mr: 1.75 },
@@ -15,10 +17,15 @@ export const KD = [
   { r: 14, az: .35, el: .62, t: [0, 0, .2], sx: -.25, sy: -.2, wide: 1, msy: .3, mr: 1.6 },
 ];
 
-export function cameraKeys(mobile) {
+// h: stable viewport height (the --vh basis, not innerHeight, so the iOS toolbar never moves the framing).
+export function cameraKeys(mobile, h = 0) {
   return KD.map(k => {
     const o = { r: k.r, az: k.az, el: k.el, tx: k.t[0], ty: k.t[1], tz: k.t[2], sx: k.sx, sy: k.sy, fov: 35 };
-    if (mobile) { o.sx = k.msx ?? 0; o.sy = k.msy ?? .2; o.fov = 42; o.r *= k.mr ?? (k.wide ? 2.05 : 1.5); }
+    if (mobile) {
+      let sy = k.msy ?? .2, mr = k.mr ?? (k.wide ? 2.05 : 1.5);
+      if (k.mshort && h) { const s = k.mshort, t = clamp((s.h[1] - h) / (s.h[1] - s.h[0])); sy = lerp(sy, s.msy, t); mr = lerp(mr, s.mr, t); }
+      o.sx = k.msx ?? 0; o.sy = sy; o.fov = 42; o.r *= mr;
+    }
     return o;
   });
 }

@@ -118,7 +118,8 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   const dKeys = [[7.7, dStart], [8.05, SV[3]], [8.6, SV[3]], [9.25, dEnd]];
 
   /* ---- camera ---- */
-  let KK = cameraKeys(mobile);
+  const stableH = () => (sectionVH && sectionVH()) || H; // --vh basis: ignores the iOS toolbar show/hide
+  let KK = cameraKeys(mobile, stableH());
   const camState = P => camAt(P, KK);
   const applyCam = (c, s) => applyCamRaw(c, s, W, H);
   function computeServ() {
@@ -195,7 +196,7 @@ export function createExperience({ host, root, reduced = false, active = 1, view
   if (!reduced && !mobile) addEventListener('pointermove', onMouse, { passive: true });
   const onResize = () => {
     [W, H] = VP(); mobile = W < 760; renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 1.75)); KK = cameraKeys(mobile); measure(); computeServ(); target = mapScroll(scrollY); follow();
+    renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 1.75)); KK = cameraKeys(mobile, stableH()); measure(); computeServ(); target = mapScroll(scrollY); follow();
     if (reduced) proxy.p = target;
   };
   addEventListener('resize', onResize);
